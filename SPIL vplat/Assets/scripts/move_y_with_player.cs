@@ -1,36 +1,39 @@
 using UnityEngine;
 
-public class CameraFollowY : MonoBehaviour
+public class CameraFollowXY : MonoBehaviour
 {
     [Header("Target Settings")]
-    public Transform player;   // The player to follow
+    public Transform player; // The player to follow
 
-    [Header("Camera Follow Settings")]
-    public float smoothSpeed = 5f; // How smoothly the camera follows the player
+    [Header("Follow Settings")]
+    public float smoothSpeed = 5f; // How smoothly the camera follows
 
-    [Header("Y-Axis Limits")]
-    public float minY = -5f;   // Lowest point the camera can go
-    public float maxY = 10f;   // Highest point the camera can go
+    [Header("Camera Limits")]
+    public bool limitX = true;
+    public bool limitY = true;
+    public float minX = -10f;
+    public float maxX = 10f;
+    public float minY = -5f;
+    public float maxY = 10f;
 
-    private float fixedX; // Keeps the X position constant
-
-    void Start()
-    {
-        // Remember the camera's initial X position
-        fixedX = transform.position.x;
-    }
+    private Vector3 targetPos;
 
     void LateUpdate()
     {
         if (player == null) return;
 
-        // Smooth follow on Y
-        float targetY = Mathf.Lerp(transform.position.y, player.position.y, smoothSpeed * Time.deltaTime);
+        // Start with player’s current position
+        targetPos = new Vector3(player.position.x, player.position.y, transform.position.z);
 
-        // Clamp camera's Y position within bounds
-        targetY = Mathf.Clamp(targetY, minY, maxY);
+        // Apply axis limits if enabled
+        if (limitX)
+            targetPos.x = Mathf.Clamp(targetPos.x, minX, maxX);
+        if (limitY)
+            targetPos.y = Mathf.Clamp(targetPos.y, minY, maxY);
 
-        // Apply the position (only Y changes)
-        transform.position = new Vector3(fixedX, targetY, transform.position.z);
+        // Smooth follow movement
+        Vector3 smoothed = Vector3.Lerp(transform.position, targetPos, smoothSpeed * Time.deltaTime);
+
+        transform.position = smoothed;
     }
 }
